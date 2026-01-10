@@ -27,6 +27,12 @@ export class LightManager {
             light.shadow.mapSize.height = this.config.shadowMapSize
 
             const shadowCam = light.shadow.camera as ShadowCamera
+            
+            // This is for PCF, VSM
+            folder.add(light.shadow, 'radius', 1, 10, 1).name('Shadow Radius')
+
+            // Only VSM
+            folder.add(light.shadow, 'blurSamples', 1, 20, 1).name('VSM Blur Samples')
 
             folder.add(this.config, 'shadowMapSize', [256, 512, 1024, 2048, 4096])
                 .name('Shadow Res')
@@ -79,7 +85,7 @@ export class LightManager {
 
         this.setupShadow(light, folder, helper)
 
-        return light
+        return { light, helper, folder }
     }
 
     createPointLight(name: string, position: THREE.Vector3) {
@@ -98,7 +104,7 @@ export class LightManager {
 
         this.setupShadow(light, folder, helper)
 
-        return light
+        return { light, helper, folder }
     }
 
     createSpotLight(name: string, position: THREE.Vector3) {
@@ -118,7 +124,7 @@ export class LightManager {
 
         this.setupShadow(light, folder, helper)
 
-        return light
+        return { light, helper, folder }
     }
 }
 
