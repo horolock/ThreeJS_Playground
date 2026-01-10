@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js'
 
 export class ShapeManager {
     private scene: THREE.Scene
@@ -26,9 +27,42 @@ export class ShapeManager {
             mesh.position.set(-3 + i * 2, 1, 0)
             mesh.castShadow = true
             mesh.receiveShadow = true
+            mesh.name = material.type
             return mesh
         })
 
         this.scene.add(...this.meshes)
+    }
+
+    public setupGUI(gui: GUI) {
+        const folder = gui.addFolder('Materials')
+
+        this.meshes.forEach((mesh) => {
+            const mat = mesh.material as any
+            const matFolder = folder.addFolder(mesh.name)
+
+            matFolder.add(mat, 'visible')
+            matFolder.add(mat, 'wireframe')
+
+            if (mat.color) {
+                matFolder.addColor(mat, 'color')
+            }
+
+            if (mat.flatShading !== undefined) {
+                matFolder.add(mat, 'flatShading').onChange(() => {
+                    mat.needsUpdate = true
+                })
+            }
+
+            if (mat instanceof THREE.MeshPhongMaterial) {
+                matFolder.add(mat, 'shininess', 0, 100)
+                matFolder.addColor(mat, 'specular')
+            }
+
+            if (mat instanceof THREE.MeshStandardMaterial) {
+                matFolder.add(mat, 'roughness', 0, 1)
+                matFolder.add(mat, 'metalness', 0, 1)
+            }
+        })
     }
 }
