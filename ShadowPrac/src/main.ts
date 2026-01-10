@@ -1,24 +1,37 @@
 import './style.css'
-import typescriptLogo from './typescript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.ts'
+import { WebGLEngine } from "./core/Engine";
+import { LightManager } from "./components/lights/LightManager";
+import { ShapeManager } from "./components/objects/ShapeManager";
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js'
+import * as THREE from 'three'
+import { LabelManager } from "./components/objects/LabelManager";
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
-`
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+const engine = new WebGLEngine()
+const gui = new GUI()
+
+engine.add(new THREE.GridHelper())
+
+const plane = new THREE.Mesh(
+  new THREE.PlaneGeometry(100, 100),
+  new THREE.MeshStandardMaterial({ color: 0xffffff })
+)
+
+plane.rotation.x = -Math.PI / 2
+plane.receiveShadow = true
+engine.add(plane)
+
+// Light
+const lightManager = new LightManager(engine.scene, gui, {
+  color: 0xffffff,
+  shadowMapSize: 512
+})
+
+const shapeManager = new ShapeManager(engine.scene)
+const labelManager = new LabelManager('.label')
+
+lightManager.createDirectionalLight('Main Sun', new THREE.Vector3(1, 4, 2))
+
+engine.addUpdateCallback((delta) => {
+  labelManager.update(shapeManager.meshes, engine.camera)
+})
